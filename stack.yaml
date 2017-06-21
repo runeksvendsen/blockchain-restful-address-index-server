@@ -5,6 +5,7 @@ packages:
 - location:
     git: https://github.com/runeksvendsen/blockchain-restful-address-index-api.git
     commit: 8961a304e87f3e83caee7c437d4996841f50ede6
+  extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/haskell-bitcoin-api.git
     commit: 5c3d774300bbc283406b6c9719f8d223e2e4f267
