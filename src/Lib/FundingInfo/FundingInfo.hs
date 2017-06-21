@@ -1,5 +1,4 @@
-{-# LANGUAGE  OverloadedStrings #-}
-
+{-# LANGUAGE OverloadedStrings #-}
 module Lib.FundingInfo.FundingInfo
 (
     module Lib.FundingInfo.FundingInfo
@@ -9,22 +8,23 @@ module Lib.FundingInfo.FundingInfo
 
 where
 
-import           Network.Bitcoin.AddrIndex.Types
+import           Config                                 (BTCRPCConf (..))
 import           Lib.FundingInfo.Internal.Types
-import           Config (BTCRPCConf(..))
+import           Network.Bitcoin.AddrIndex.Types
 
-import           Network.Bitcoin.Api.Client (Client, withClient)
-import           Network.Bitcoin.Api.Blockchain (searchRawTransactions)
-import qualified Network.Bitcoin.Api.UTXO               as UTXO
+import           Control.Monad                          (mapM)
+import           Data.Base58String.Bitcoin              (b58String)
+import qualified Data.Base58String.Bitcoin              as B58S
+import qualified Data.Bitcoin.Types                     as BT
+import           Data.List                              (sortOn)
+import qualified Data.Maybe                             as Maybe
+import           Network.Bitcoin.Api.Blockchain         (searchRawTransactions)
+import           Network.Bitcoin.Api.Client             (Client, withClient)
+import           Network.Bitcoin.Api.Types.TxInfo       (TxInfo (..), Vin (..),
+                                                         Vout (..))
 import qualified Network.Bitcoin.Api.Types.UnspentTxOut as UTXO
-import           Network.Bitcoin.Api.Types.TxInfo (TxInfo(..), Vout(..), Vin(..))
-import qualified Network.Haskoin.Crypto as HC
-import qualified Data.Bitcoin.Types  as BT
-import qualified Data.Base58String.Bitcoin as B58S
-import           Data.Base58String.Bitcoin (b58String)
-import           Control.Monad (forM)
-import           Data.List (sortOn)
-import qualified Data.Maybe as Maybe
+import qualified Network.Bitcoin.Api.UTXO               as UTXO
+import qualified Network.Haskoin.Crypto                 as HC
 
 
 match :: UTXO.UnspentTxOut -> AddressFundingInfoRes -> Bool
@@ -86,7 +86,7 @@ getUnredeemedOutputs' rpcConf@(BTCRPCConf host port user pass _) addr =
     withClient host port user pass $ \client ->
         fmap Maybe.catMaybes $
             getAllOutputs' rpcConf addr >>=
-            flip forM (checkSpentAndConfirmData client)
+            flip mapM (checkSpentAndConfirmData client)
 
 -- |Get all outputs in the Blockchain paying to address
 getAllOutputs :: BTCRPCConf -> HC.Address -> IO [AddressFundingInfo]

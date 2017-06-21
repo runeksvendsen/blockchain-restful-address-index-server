@@ -6,19 +6,19 @@ module Lib.PublishTx.PublishTx
 
 import           Config
 
-import           Control.Monad.IO.Class (liftIO, MonadIO)
-import           Control.Exception (try)
-import           Network.HTTP.Client (HttpException)
-import           Network.Bitcoin.Api.Client (Client, withClient)
+import           Control.Exception               (try)
+import           Control.Monad.IO.Class          (MonadIO, liftIO)
+import           Network.Bitcoin.Api.Client      (Client, withClient)
 import           Network.Bitcoin.Api.Transaction (send)
+import           Network.HTTP.Client             (HttpException)
 
-import           Network.Haskoin.Transaction as HT
-import qualified Data.Bitcoin.Transaction as Btc
+import qualified Data.Bitcoin.Transaction        as Btc
+import           Network.Haskoin.Transaction     as HT
 
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base16 as B16
-import           Data.HexString as Hex
-import qualified Data.Serialize as Bin
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Base16          as B16
+import           Data.HexString                  as Hex
+import qualified Data.Serialize                  as Bin
 
 
 

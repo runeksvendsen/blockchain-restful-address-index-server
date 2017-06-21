@@ -1,24 +1,25 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 module Lib.TxOutProof.Proof where
 
-import           Util
-import           Types
+import           Config                               (BTCRPCConf (..))
+import qualified Data.Aeson                           as JSON
+import qualified Data.Bitcoin.Types                   as BT
 import           Network.Bitcoin.AddrIndex.Types
-import           Config (BTCRPCConf(..))
-import qualified Network.Bitcoin.Api.Types.HeaderInfo   as HDI
-import           Network.Bitcoin.Api.Client               (Client, withClient)
-import           Network.Bitcoin.Api.Blockchain         as Chain
-import qualified Data.Aeson                             as JSON
-import qualified Network.Bitcoin.Api.UTXO       as UTXO
-import qualified Data.Bitcoin.Types             as BT
+import           Network.Bitcoin.Api.Blockchain       as Chain
+import           Network.Bitcoin.Api.Client           (Client, withClient)
+import qualified Network.Bitcoin.Api.Types.HeaderInfo as HDI
+import qualified Network.Bitcoin.Api.UTXO             as UTXO
+import           Types
+import           Util
 
-import qualified Network.Haskoin.Block          as HB
-import qualified Network.Haskoin.Transaction    as HT
-import           Data.HexString                 as Hex
-import qualified Data.Serialize                 as Bin
-import qualified Data.Text                      as T
-import qualified Control.Exception              as E
-import           Network.HTTP.Client              (HttpException)
+import qualified Control.Exception                    as E
+import           Data.HexString                       as Hex
+import qualified Data.Serialize                       as Bin
+import qualified Data.Text                            as T
+import qualified Network.Haskoin.Block                as HB
+import qualified Network.Haskoin.Transaction          as HT
+import           Network.HTTP.Client                  (HttpException)
 import           Servant
 
 

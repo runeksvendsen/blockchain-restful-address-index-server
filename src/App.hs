@@ -1,27 +1,31 @@
-{-# LANGUAGE OverloadedStrings, DataKinds, FlexibleContexts, LambdaCase, TypeOperators #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators     #-}
 
 module App ( main ) where
 
 import           Types
 import           Util
 
-import qualified Network.Bitcoin.AddrIndex.API as Spec
+import qualified Config                          as Conf
+import qualified Lib.FundingInfo.FundingInfo     as Funding
+import qualified Lib.PublishTx.PublishTx         as PubTx
+import qualified Lib.TxOutProof.Proof            as Proof
+import qualified Network.Bitcoin.AddrIndex.API   as Spec
 import           Network.Bitcoin.AddrIndex.Types
-import qualified Lib.FundingInfo.FundingInfo as Funding
-import qualified Lib.PublishTx.PublishTx as PubTx
-import qualified Lib.TxOutProof.Proof as Proof
-import qualified Config as Conf
 
-import           Control.Monad.IO.Class     (liftIO)
-import           Data.String.Conversions    (cs)
-import qualified Network.Wai as Wai
-import qualified Network.Wai.Handler.Warp as Warp
+import qualified Control.Monad.Error.Class       as Except
+import           Control.Monad.IO.Class          (liftIO)
+import qualified Control.Monad.Reader            as Reader
+import qualified Data.Aeson                      as JSON
+import qualified Data.ByteString                 as BS
+import qualified Data.Maybe                      as Maybe
+import           Data.String.Conversions         (cs)
+import qualified Network.Wai                     as Wai
+import qualified Network.Wai.Handler.Warp        as Warp
 import           Servant
-import qualified Control.Monad.Error.Class as Except
-import qualified Control.Monad.Reader as Reader
-import qualified Data.Maybe as Maybe
-import qualified Data.ByteString as BS
-import qualified Data.Aeson as JSON
 
 
 api :: Proxy Spec.BlockchainApi
