@@ -31,7 +31,7 @@ match :: UTXO.UnspentTxOut -> AddressFundingInfoRes -> Bool
 match
     (UTXO.UnspentTxOut utxConfs utxAmount (utxAddr:_))
     (AddressFundingInfoRes afiAddr _ _ afiConfs afiAmount) =
-        afiAddr == utxAddr && afiConfs == utxConfs && afiAmount == utxAmount
+        afiAddr == utxAddr && afiAmount == utxAmount
 match
     (UTXO.UnspentTxOut _ _ [])
     AddressFundingInfoRes {} = False
