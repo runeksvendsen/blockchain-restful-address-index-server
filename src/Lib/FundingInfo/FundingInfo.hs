@@ -34,12 +34,12 @@ match
         afiAddr == utxAddr && afiConfs == utxConfs && afiAmount == utxAmount
 match
     (UTXO.UnspentTxOut _ _ [])
-    (AddressFundingInfoRes _ _ _ _ _) = False
+    AddressFundingInfoRes {} = False
 
 -- | Return information about all outputs in TxInfo paying to a single address if this
 --      address equals the specified address.
 outputsPayingToAddress :: B58S.Base58String -> TxInfo -> [AddressFundingInfoRes]
-outputsPayingToAddress addr TxInfo{ txid = txid, vouts = vouts, confs = confs } =
+outputsPayingToAddress addr TxInfo{..} =
     map (\vout -> AddressFundingInfoRes addr txid (index vout) confs (amount vout) ) $
         filter ((== addr) . head . addresses) .
         -- An output can pay to more than one address, apparently. We ignore these outputs.
@@ -72,7 +72,8 @@ checkSpentAndConfirmData client afi@(AddressFundingInfoRes _ txid index _ _) =
             if utxOut `match` afi then
                     afi
                 else
-                    error "BUG: Address index/tx index discrepancy"
+                    error $ "BUG: Address index/tx index discrepancy: "
+                          ++ show (utxOut, afi)
 
 getAllOutputs' :: BTCRPCConf -> B58S.Base58String -> IO [AddressFundingInfoRes]
 getAllOutputs' (BTCRPCConf host port user pass _) addr =
@@ -86,7 +87,7 @@ getUnredeemedOutputs' rpcConf@(BTCRPCConf host port user pass _) addr =
     withClient host port user pass $ \client ->
         fmap Maybe.catMaybes $
             getAllOutputs' rpcConf addr >>=
-            flip mapM (checkSpentAndConfirmData client)
+            mapM (checkSpentAndConfirmData client)
 
 -- |Get all outputs in the Blockchain paying to address
 getAllOutputs :: BTCRPCConf -> HC.Address -> IO [AddressFundingInfo]

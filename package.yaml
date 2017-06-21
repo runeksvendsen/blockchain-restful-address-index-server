@@ -9,6 +9,11 @@ license: OtherLicense
 license-file: LICENSE
 github: runeksvendsen/blockchain-restful-address-index-server
 
+
+default-extensions:
+- RecordWildCards
+- OverloadedStrings
+
 dependencies:
 - blockchain-restful-address-index-api
 - base16-bytestring
@@ -52,4 +57,5 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-
+    - -dcore-lint
+    - -debug
