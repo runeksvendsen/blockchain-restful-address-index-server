@@ -48,14 +48,14 @@ server rawPath = allOutputs :<|> unspentOuts :<|> txOutProof :<|> publishTx :<|>
         txOutProof txid = Proof.getFundingProof txid >>=
             maybe (Except.throwError err404 { errBody = "Transaction not found" }) return
         publishTx (PushTxReq tx) = Reader.ask >>=
-            liftIO . flip PubTx.bitcoindNetworkSumbitTx tx >>= onLeftThrow500
+            liftIO . flip PubTx.bitcoindNetworkSumbitTx tx >>= onLeftThrow
         rawCmd method args = do
             liftIO . putStrLn . unlines $
                 [ "Method: " ++ show method ] ++
                 [ "Args:   " ++ show args ] ++
                 [ "RAW path: " ++ show rawPath ]
             return (JSON.toJSON ["hey" :: String])
-        onLeftThrow500   = either (\e -> Except.throwError $ err500 { errBody = cs e })
+        onLeftThrow   = either (Except.throwError . PubTx.toServantErr)
             (return . PushTxResp)
 
 app :: Conf.BTCRPCConf -> Wai.Application

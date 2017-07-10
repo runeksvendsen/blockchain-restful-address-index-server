@@ -7,8 +7,8 @@ packages:
     commit: 8961a304e87f3e83caee7c437d4996841f50ede6
   extra-dep: true
 - location:
-    git: https://github.com/runeksvendsen/haskell-bitcoin-api.git
-    commit: 5c3d774300bbc283406b6c9719f8d223e2e4f267
+    git: https://github.com/solatis/haskell-bitcoin-api.git
+    commit: 14571eca24b541640e9f2a218381066f5b3f9447
   extra-dep: true
 
 extra-deps:

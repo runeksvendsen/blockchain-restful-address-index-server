@@ -29,8 +29,8 @@ import qualified Network.Haskoin.Crypto                 as HC
 
 match :: UTXO.UnspentTxOut -> AddressFundingInfoRes -> Bool
 match
-    (UTXO.UnspentTxOut utxConfs utxAmount (utxAddr:_))
-    (AddressFundingInfoRes afiAddr _ _ afiConfs afiAmount) =
+    (UTXO.UnspentTxOut _ utxAmount (utxAddr:_))
+    (AddressFundingInfoRes afiAddr _ _ _ afiAmount) =
         afiAddr == utxAddr && afiAmount == utxAmount
 match
     (UTXO.UnspentTxOut _ _ [])
@@ -75,26 +75,46 @@ checkSpentAndConfirmData client afi@(AddressFundingInfoRes _ txid index _ _) =
                     error $ "BUG: Address index/tx index discrepancy: "
                           ++ show (utxOut, afi)
 
+-- | Get all outputs related to an address
+outsForAddr :: BTCRPCConf -> B58S.Base58String -> IO [AddressFundingInfoRes]
+outsForAddr rpcConf addr =
+    withClient' rpcConf $ \client -> do
+        outs <- sortOn timestamp <$> searchRawTransactions client addr
+        let payingOuts = concatMap (outputsPayingToAddress addr) (outs :: [TxInfo])
+
+
+        return undefined
+
+
+
+
 getAllOutputs' :: BTCRPCConf -> B58S.Base58String -> IO [AddressFundingInfoRes]
-getAllOutputs' (BTCRPCConf host port user pass _) addr =
-    withClient host port user pass $ \client ->
-        concat . fmap (outputsPayingToAddress addr) .
+getAllOutputs' rpcConf addr =
+    withClient' rpcConf $ \client ->
+        concatMap (outputsPayingToAddress addr) .
         reverse . sortOn timestamp <$>
             searchRawTransactions client addr
-
-getUnredeemedOutputs' :: BTCRPCConf -> B58S.Base58String -> IO [AddressFundingInfoRes]
-getUnredeemedOutputs' rpcConf@(BTCRPCConf host port user pass _) addr =
-    withClient host port user pass $ \client ->
-        fmap Maybe.catMaybes $
-            getAllOutputs' rpcConf addr >>=
-            mapM (checkSpentAndConfirmData client)
 
 -- |Get all outputs in the Blockchain paying to address
 getAllOutputs :: BTCRPCConf -> HC.Address -> IO [AddressFundingInfo]
 getAllOutputs conf addr = map toHaskoin <$>
-    getAllOutputs' conf (b58String . HC.addrToBase58 $ addr)
+    getAllOutputs' conf addr'
+  where
+    addr' = b58String . HC.addrToBase58 $ addr
 
 -- |Get all unredeemed outputs in the Blockchain paying to address
 getUnredeemedOutputs :: BTCRPCConf -> HC.Address -> IO [AddressFundingInfo]
 getUnredeemedOutputs conf addr = map toHaskoin <$>
-    getUnredeemedOutputs' conf (b58String . HC.addrToBase58 $ addr)
+    withClient' conf getAllCheck
+  where
+    getAllCheck client =
+          fmap Maybe.catMaybes $
+              getAllOutputs' conf addr' >>=
+              mapM (checkSpentAndConfirmData client)
+    addr' = b58String . HC.addrToBase58 $ addr
+
+
+
+withClient' :: BTCRPCConf -> (Client -> IO a) -> IO a
+withClient' (BTCRPCConf host port user pass _) =
+    withClient host port user pass
