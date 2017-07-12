@@ -8,6 +8,7 @@ module Lib.FundingInfo.FundingInfo
 
 where
 
+import           Util
 import           Config                                 (BTCRPCConf (..))
 import           Lib.FundingInfo.Internal.Types
 import           Network.Bitcoin.AddrIndex.Types

@@ -4,11 +4,11 @@ packages:
 - '.'
 - location:
     git: https://github.com/runeksvendsen/blockchain-restful-address-index-api.git
-    commit: 8961a304e87f3e83caee7c437d4996841f50ede6
+    commit: e2ed640811d89accb72ab0203a88f5ec672fd1fa
   extra-dep: true
 - location:
     git: https://github.com/solatis/haskell-bitcoin-api.git
-    commit: 14571eca24b541640e9f2a218381066f5b3f9447
+    commit: f3a2c2a82fe72b076be6f9f7befb6b17cebdd522
   extra-dep: true
 
 extra-deps:

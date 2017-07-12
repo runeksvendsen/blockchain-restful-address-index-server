@@ -7,12 +7,12 @@
 module App ( main ) where
 
 import           Types
-import           Util
-
+import           Lib.Error
 import qualified Config                          as Conf
 import qualified Lib.FundingInfo.FundingInfo     as Funding
 import qualified Lib.PublishTx.PublishTx         as PubTx
 import qualified Lib.TxOutProof.Proof            as Proof
+import qualified Lib.EstimateFee.Fee             as Fee
 import qualified Network.Bitcoin.AddrIndex.API   as Spec
 import           Network.Bitcoin.AddrIndex.Types
 
@@ -22,7 +22,6 @@ import qualified Control.Monad.Reader            as Reader
 import qualified Data.Aeson                      as JSON
 import qualified Data.ByteString                 as BS
 import qualified Data.Maybe                      as Maybe
-import           Data.String.Conversions         (cs)
 import qualified Network.Wai                     as Wai
 import qualified Network.Wai.Handler.Warp        as Warp
 import           Servant
@@ -39,24 +38,24 @@ readerToEither :: Conf.BTCRPCConf -> AppM :~> Handler
 readerToEither cfg = Nat $ \x -> Reader.runReaderT x cfg
 
 server :: BS.ByteString -> ServerT Spec.BlockchainApi AppM
-server rawPath = allOutputs :<|> unspentOuts :<|> txOutProof :<|> publishTx :<|> rawCmd
+server rawPath = allOutputs :<|> unspentOuts :<|> txOutProof :<|> publishTx
+                            :<|> estimateFee :<|> rawCmd
     where
         allOutputs addr  = Reader.ask >>=
             liftIO . flip Funding.getAllOutputs (getAddress addr)
         unspentOuts addr = Reader.ask >>=
             liftIO . flip Funding.getUnredeemedOutputs (getAddress addr)
-        txOutProof txid = Proof.getFundingProof txid >>=
-            maybe (Except.throwError err404 { errBody = "Transaction not found" }) return
+        txOutProof txid = Proof.getFundingProof txid >>= onLeftThrow
         publishTx (PushTxReq tx) = Reader.ask >>=
             liftIO . flip PubTx.bitcoindNetworkSumbitTx tx >>= onLeftThrow
+        estimateFee blks = Fee.getEstimatedFee blks >>= onLeftThrow
         rawCmd method args = do
             liftIO . putStrLn . unlines $
                 [ "Method: " ++ show method ] ++
                 [ "Args:   " ++ show args ] ++
                 [ "RAW path: " ++ show rawPath ]
             return (JSON.toJSON ["hey" :: String])
-        onLeftThrow   = either (Except.throwError . PubTx.toServantErr)
-            (return . PushTxResp)
+        onLeftThrow = either (Except.throwError . toServantErr) return
 
 app :: Conf.BTCRPCConf -> Wai.Application
 app rpccfg request respond = do
