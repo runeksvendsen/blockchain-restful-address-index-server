@@ -15,6 +15,8 @@ Thin RESTful HTTP wrapper for [address-index patched Bitcoin Core](https://githu
 * **POST** `/publishTx` (publish transaction to the network) 
   * Request body: `{ 'tx_data' : "<hex-encoded transaction>" }` (`Content-Type: application/json`)
   * Response body: `{ 'tx_id' : "<transaction id>" }` (`Content-Type: application/json`)
+* **GET** `/estimateFee/<max_blocks>` (estimated fee, in satoshis per byte, to get a transaction confirmed within `max_blocks` blocks)
+  * Response body: `<satoshis_per_byte>` (`Content-Type: application/json`)
 
 ### Limitations
 An output needs at least a single confirmation before it appears in the returned list (it needs to be in a block). However, if a new unconfirmed transaction appears which redeems this output, it will not be included in the list of unspent outputs. In other words, you cannot get information about an output until it has at least one confirmation, but the output will disappear immediately from the list of unspent outputs if a spending transaction appears.
